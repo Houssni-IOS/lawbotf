@@ -1,0 +1,83 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap");
+
+:root {
+  --body-bg: #f5f8ff;
+  --box-bg: #fff;
+  --input-bg: #f5f8ff;
+  --txt-color: #2f2d2f;
+  --txt-second-color: #ccc;
+  --border-color: rgb(101, 49, 160);
+  --box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  background-color: var(--body-bg);
+  color: var(--txt-color);
+
+  display: flex;
+  justify-content: center;
+  padding-top: 30px;
+
+  height: 100vh;
+}
+
+.box {
+  background-color: var(--box-bg);
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: var(--box-shadow);
+}
+
+.header {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.img {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 140px;
+  width: 40%; /* Adjust the width as needed */
+}
+
+/* Highlight Animation for Discussion Name */
+.highlight-animation {
+  animation: highlight 1s ease-in-out;
+}
+
+@keyframes highlight {
+  from {
+    background-color: #5f249f; /* Start with the highlight color */
+  }
+  to {
+    background-color: #3a3a3a; /* Transition back to the regular background color */
+  }
+}
+/* Example CSS */
+
+/* Light mode */
+.bg-light {
+    background-color: #f5f5f5;
+  }
+  .text-light {
+    color: #000000;
+  }
+  
+  /* Dark mode */
+  .bg-dark {
+    background-color: #2A2A2A;
+  }
+  .text-dark {
+    color: #ffffff;
+  }
+  

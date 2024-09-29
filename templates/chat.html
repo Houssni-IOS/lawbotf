@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Chat Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            max-width: 800px;
+            margin: 50px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .documents-section {
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            width: 300px;
+        }
+
+        .documents-section h2 {
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .documents-section select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #333;
+            background-color: #fff;
+            outline: none;
+        }
+
+        .documents-section button {
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .documents-section button:hover {
+            background-color: #0056b3;
+        }
+
+        .chat-container {
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            flex-grow: 1;
+            max-width: 600px;
+        }
+
+        .chat-messages {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .message {
+            padding: 10px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 5px;
+            font-size: 16px;
+            color: #333;
+            background-color: #fff;
+        }
+
+        .question .message-content {
+            background-color: #e6f7ff;
+            border-top-left-radius: 0;
+        }
+
+        .response .message-content {
+            background-color: #f0f0f0;
+            border-top-right-radius: 0;
+            text-align: right;
+        }
+
+        .footer {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            background-color: #f0f0f0;
+            border-top: 1px solid #ccc;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        .user-input input[type="text"] {
+            flex-grow: 1;
+            margin-right: 10px;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #333;
+            background-color: #fff;
+            outline: none;
+        }
+
+        .user-input button {
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .user-input button:hover {
+            background-color: #0056b3;
+        }
+
+        .header {
+            background-color: #333; /* Background color of the header */
+            color: #fff; /* Text color */
+            padding: 10px 20px; /* Padding around the content */
+            position: fixed; /* Fixed positioning */
+            top: 0; /* Stick to the top of the page */
+            left: 0; /* Stick to the left side */
+            width: 100%; /* Full width */
+            z-index: 1000; /* Ensure the item is above other elements */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="documents-section">
+            <h2>Or select existing documents</h2>
+            <form action="{{ url_for('select_existing_documents') }}" method="post">
+                <select name="document_id">
+                    {% for document in stored_documents %}
+                        <option value="{{ document.id }}">{{ document.filename }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        <div>
+            <form action="{{ url_for('upload_pdf') }}" method="post" >
+                <button class="btn btn-primary btn-block" type="submit">Upload new document</button>
+            </form>
+        </div>
+    </div>
+
+        <div class="chat-container" id="chat-container">
+            <div class="chat-messages" id="chat-messages">
+                {% for chat in chat_history %}
+                    <div class="message">
+                        <div class="message-content">
+                            <p><strong>Question:</strong> {{ chat.question }}</p>
+                        </div>
+                        <div class="message-content">
+                        <p><strong>Response:</strong> {{ chat.response }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="footer">
+                <div class="user-input">
+                    <input type="text" id="user-message" placeholder="Type your message...">
+                    <button onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="header">
+        <h1>Hello, {{session["username"]}}!</h3>
+        <form action="{{ url_for('logout') }}">
+            <button type="submit">Logout</button>
+        </form>
+    </div>
+
+    <script>
+        function sendMessage() {
+            var userMessage = document.getElementById('user-message').value;
+            if (userMessage.trim() === '') return;
+
+            var chatMessages = document.getElementById('chat-messages');
+
+            var userMessageDiv = document.createElement('div');
+            userMessageDiv.classList.add('message');
+            userMessageDiv.classList.add('response');
+            var messageContent = document.createElement('div');
+            messageContent.classList.add('message-content');
+            var messageParagraph = document.createElement('p');
+            messageParagraph.textContent = userMessage;
+            messageContent.appendChild(messageParagraph);
+            userMessageDiv.appendChild(messageContent);
+            chatMessages.appendChild(userMessageDiv);
+
+            document.getElementById('user-message').value = '';
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            fetch('/chat', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    'user-message': userMessage
+                }),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                var responseMessage = data.response;
+                
+                var responseDiv = document.createElement('div');
+                responseDiv.classList.add('message');
+                responseDiv.classList.add('question');
+                var responseContent = document.createElement('div');
+                responseContent.classList.add('message-content');
+                var responseParagraph = document.createElement('p');
+                responseParagraph.textContent = responseMessage;
+                responseContent.appendChild(responseParagraph);
+                responseDiv.appendChild(responseContent);
+                chatMessages.appendChild(responseDiv);
+
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+        }
+    </script>
+</body>
+</html>
